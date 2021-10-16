@@ -21,13 +21,20 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     let ls = ls::LSFile::open(_ls_file).unwrap(); 
 
     let rf_file_info = ls.find("resource");
+    //Resorce file info get!
+
     //let d = File::open(_dt_file).unwrap();
-    print!("RF Compressed is {0} Bytes\nRF Offset is {1}",rf_file_info.size,rf_file_info.offset);
+    print!("RF Compressed is {0} Bytes\nRF Offset is {1}\n",rf_file_info.size,rf_file_info.offset);
     let  mut dt = BufReader::new(File::open(_dt_file).unwrap());
+    //Load our Data file into memory
     dt.seek(SeekFrom::Start(rf_file_info.offset as u64));
-    let mut rf_encode = vec![0u8;rf_file_info.size as usize];
-    dt.read_exact(&mut rf_encode).unwrap();
-    let rf_decoded = ZlibDecoder::new(&rf_encode[..]);
-    //rf_decoded.read_vectored(bufs: &mut [IoSliceMut<'_>])
+    //Seek to our RF file
+    let mut rf_data = vec![0u8;rf_file_info.size as usize];
+    //Alocate memory for rf
+    dt.read_exact(&mut rf_data).unwrap();
+    //Read from buffer into that alocated memor
+    println!("{0}{1}",rf_data[0] as char,rf_data[1] as char);
+
+
 
 }
