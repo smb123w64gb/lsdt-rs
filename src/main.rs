@@ -7,6 +7,7 @@ use std::io::Seek;
 use std::io::Read;
 use std::io::SeekFrom;
 use std::fs::File;
+use std::io::Cursor;
 mod ls;
 
 fn main() {
@@ -32,8 +33,13 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     let mut rf_data = vec![0u8;rf_file_info.size as usize];
     //Alocate memory for rf
     dt.read_exact(&mut rf_data).unwrap();
-    //Read from buffer into that alocated memor
-    println!("{0}{1}",rf_data[0] as char,rf_data[1] as char);
+    //Read from buffer into that alocated memory
+    let mut rf_cursor = Cursor::new(rf_data);
+
+    let mut test = vec!(0u8;2);
+    rf_cursor.read_exact(&mut test).unwrap();
+
+    println!("{0}{1} Cursor is at Pos: {2}", test[0] as char,test[1] as char,rf_cursor.position());
 
 
 
