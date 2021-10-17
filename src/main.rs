@@ -28,7 +28,7 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     print!("RF Compressed is {0} Bytes\nRF Offset is {1}\n",rf_file_info.size,rf_file_info.offset);
     let  mut dt = BufReader::new(File::open(_dt_file).unwrap());
     //Load our Data file into memory
-    dt.seek(SeekFrom::Start(rf_file_info.offset as u64));
+    dt.seek(SeekFrom::Start(rf_file_info.offset as u64)).unwrap();
     //Seek to our RF file
     let mut rf_data = vec![0u8;rf_file_info.size as usize];
     //Alocate memory for rf
