@@ -1,7 +1,5 @@
 
 use std::path::PathBuf;
-use std::path::Path;
-use flate2::read::ZlibDecoder;
 use std::io::BufReader;
 use std::io::Seek;
 use std::io::Read;
@@ -9,6 +7,9 @@ use std::io::SeekFrom;
 use std::fs::File;
 use std::io::Cursor;
 mod ls;
+mod rf;
+
+pub use ls::ls_str::crc32;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -35,11 +36,9 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     dt.read_exact(&mut rf_data).unwrap();
     //Read from buffer into that alocated memory
     let mut rf_cursor = Cursor::new(rf_data);
-
-    let mut test = vec!(0u8;2);
-    rf_cursor.read_exact(&mut test).unwrap();
-
-    println!("{0}{1} Cursor is at Pos: {2}", test[0] as char,test[1] as char,rf_cursor.position());
+    let rf = rf::RFFile::read(&mut rf_cursor);
+    println!("{0} is at pos {1}",rf.header.magic,rf_cursor.position());
+    println!("{0}",rf.data.ver);
 
 
 

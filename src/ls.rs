@@ -1,12 +1,10 @@
-use binread::{BinReaderExt, derive_binread, io::{Read, Seek}};
+use binread::{BinReaderExt, derive_binread};
 use std::io::BufReader;
 use std::path::Path;
 
 pub use binread::Error;
 pub use binread::BinResult;
-
-mod ls_str;
-
+pub mod ls_str;
 #[derive_binread]
 #[derive(Debug, PartialEq)]
 pub struct LSFile {
@@ -41,12 +39,8 @@ impl LSFile{
     pub fn open<P: AsRef<Path>>(path: P) -> BinResult<Self> {
         BufReader::new(std::fs::File::open(path)?).read_le()
     }
-    #[allow(unused)]
-    pub fn read<R: Read + Seek>(reader: &mut R) -> BinResult<Self> {
-        reader.read_le()
-    }
     pub fn find(&self, value: &str) -> LSEntry{
-        let crchash = ls_str::crc32(&value.as_bytes());
+        let crchash = ls_str::crc32(value.as_bytes());
         let entry = self.ls_entry.iter().rposition(|n| n.crc == crchash);
         let mut return_value: LSEntry = LSEntry{
             crc : 0,
@@ -59,6 +53,6 @@ impl LSFile{
             Some(x) => return_value = self.ls_entry[x],
             None => println!("Can not find:{}",value)
         }
-        return return_value;
+        return_value
     }
 }
