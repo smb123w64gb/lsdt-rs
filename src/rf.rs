@@ -43,22 +43,12 @@ pub struct RFHeader {
 #[derive_binread]
 #[derive(Debug, PartialEq)]
 pub struct RFData {
-    pub magic: u32,
-    pub ver: u32,
-    pub hdr_len: u32,
-    pub padding: u32,
-    pub resource_entry: u32,
-    
-    #[br(temp)]
-    pub resource_size: u32,
+    pub offset_in_pack: u32,
+    pub name_offset: u32,
+    pub cmp_size: u32,
+    pub size: u32,
     pub timestamp: u32,
-    pub compressed_size: u32,
-    pub uncompressed_size: u32,
-
-    pub offset_names: u32,
-    pub name_size: u32,
-    pub nbr_entrys: u32,
-   
+    pub flags: u32,
 }
 impl RFHeader{
     pub fn read<R: Read + Seek>(reader: &mut R) -> BinResult<Self> {
