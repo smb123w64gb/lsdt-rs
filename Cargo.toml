@@ -15,4 +15,5 @@ path = "src/main.rs"
 binread = "2.1.1"
 flate2 = "1.0.20"
 crc32fast = "1.2"
+modular-bitfield = "0.11.2"
 

@@ -1,4 +1,5 @@
-use binread::{BinReaderExt, derive_binread, io::{Read, Seek,SeekFrom}};
+use binread::{BinReaderExt,BinRead, derive_binread, io::{Read, Seek,SeekFrom}};
+use modular_bitfield::prelude::*;
 use flate2::read::ZlibDecoder;
 use std::io::Cursor;
 pub use binread::Error;
@@ -48,8 +49,24 @@ pub struct RFData {
     pub cmp_size: u32,
     pub size: u32,
     pub timestamp: u32,
-    pub flags: u32,
+    pub flags: RFFLags,
 }
+#[bitfield]
+#[derive(BinRead,Debug,PartialEq)]
+#[br(map = Self::from_bytes)]
+pub struct RFFLags {
+    folder_depth: B8,
+    is_unk0: bool,
+    is_folder: bool,
+    is_package: bool,
+    is_region: bool,
+    is_off_in_pack: bool,
+    is_unk1:bool,
+    is_overwrite:bool,
+    is_unk2:bool,
+    extra:u16,
+}
+
 impl RFHeader{
     pub fn read<R: Read + Seek>(reader: &mut R) -> BinResult<Self> {
         reader.read_le()
