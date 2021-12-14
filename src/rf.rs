@@ -6,7 +6,8 @@ pub use binread::Error;
 pub use binread::BinResult;
 pub struct RFFile{
     pub header: RFHeader,
-    pub data: RFData,
+    //Add bin read array func
+    pub data: Vec<RFData>,
 }
 impl RFFile{
     pub fn read<R: Read + Seek>(reader: &mut R) -> RFFile{
@@ -38,12 +39,17 @@ pub struct RFHeader {
     pub offset_names: u32,
     pub name_size: u32,
     pub nbr_entrys: u32,
+}
+#[derive_binread]
+#[derive(Debug, PartialEq)]
+#[br(import(nbr_entrys: u32))]
+pub struct RFInner {
 
-   
 }
 #[derive_binread]
 #[derive(Debug, PartialEq)]
 pub struct RFData {
+    //Need to vector all our entrys, add in a input so we can know how many, and a string manager due to the crazy index to folder n stuff
     pub offset_in_pack: u32,
     pub name_offset: u32,
     pub cmp_size: u32,
@@ -59,12 +65,13 @@ pub struct RFFLags {
     is_unk0: bool,
     is_folder: bool,
     is_package: bool,
-    is_region: bool,
+    is_localized: bool,
     is_off_in_pack: bool,
     is_unk1:bool,
     is_overwrite:bool,
     is_unk2:bool,
     extra:u16,
+    //ffffffff0oprs0v0
 }
 
 impl RFHeader{
