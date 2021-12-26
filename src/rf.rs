@@ -17,7 +17,11 @@ impl RFFile{
         let mut decomp_zlib = ZlibDecoder::new(reader);
         decomp_zlib.read_to_end(&mut rf_decomp).unwrap();
         let mut rf_de_cursor = Cursor::new(rf_decomp);
-        RFFile{header:rf_hdr,data:RFData::read(&mut rf_de_cursor).unwrap()}
+        let mut data_vec = Vec::new();
+        for n in 0..rf_hdr.nbr_entrys{
+            data_vec.push(RFData::read(&mut rf_de_cursor).unwrap())
+        }
+        RFFile{header:rf_hdr,data:data_vec}
     } 
 }
 
@@ -42,12 +46,6 @@ pub struct RFHeader {
 }
 #[derive_binread]
 #[derive(Debug, PartialEq)]
-#[br(import(nbr_entrys: u32))]
-pub struct RFInner {
-
-}
-#[derive_binread]
-#[derive(Debug, PartialEq)]
 pub struct RFData {
     //Need to vector all our entrys, add in a input so we can know how many, and a string manager due to the crazy index to folder n stuff
     pub offset_in_pack: u32,
@@ -55,12 +53,12 @@ pub struct RFData {
     pub cmp_size: u32,
     pub size: u32,
     pub timestamp: u32,
-    pub flags: RFFLags,
+    pub flags: RFFlags,
 }
 #[bitfield]
 #[derive(BinRead,Debug,PartialEq)]
 #[br(map = Self::from_bytes)]
-pub struct RFFLags {
+pub struct RFFlags {
     folder_depth: B8,
     is_unk0: bool,
     is_folder: bool,
@@ -71,7 +69,6 @@ pub struct RFFLags {
     is_overwrite:bool,
     is_unk2:bool,
     extra:u16,
-    //ffffffff0oprs0v0
 }
 
 impl RFHeader{
