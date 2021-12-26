@@ -19,7 +19,9 @@ impl RFFile{
         let mut rf_de_cursor = Cursor::new(rf_decomp);
         let mut data_vec = Vec::new();
         for n in 0..rf_hdr.nbr_entrys{
-            data_vec.push(RFData::read(&mut rf_de_cursor).unwrap())
+            let mut cur_rfdata = RFData::read(&mut rf_de_cursor).unwrap();
+            
+            data_vec.push(cur_rfdata);
         }
         RFFile{header:rf_hdr,data:data_vec}
     } 
@@ -55,6 +57,23 @@ pub struct RFData {
     pub timestamp: u32,
     pub flags: RFFlags,
 }
+
+#[bitfield]
+#[derive(BinRead,Debug,PartialEq)]
+#[br(map = Self::from_bytes)]
+pub struct StringInfo {
+    pub ext_index : B8,
+    pub name_offset : B24,
+}
+
+#[bitfield]
+#[derive(BinRead,Debug,PartialEq)]
+#[br(map = Self::from_bytes)]
+pub struct ReltiveStringInfo {
+    pub reflen : B5,
+    pub refoff : B3,
+}
+
 #[bitfield]
 #[derive(BinRead,Debug,PartialEq)]
 #[br(map = Self::from_bytes)]

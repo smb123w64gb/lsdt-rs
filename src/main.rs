@@ -38,7 +38,7 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     let mut rf_cursor = Cursor::new(rf_data);
     let rf = rf::RFFile::read(&mut rf_cursor);
     println!("{0} is at pos {1}",rf.header.magic,rf_cursor.position());
-    println!("{0}",rf.data[0].name_offset);
+    println!("{0}",rf.data[100].name_offset);
 
 
 
