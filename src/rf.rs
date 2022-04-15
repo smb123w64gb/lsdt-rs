@@ -8,6 +8,7 @@ pub struct RFFile{
     pub header: RFHeader,
     //Add bin read array func
     pub data: Vec<RFData>,
+    pub debug_extract: Vec<u8>,
 }
 impl RFFile{
     pub fn read<R: Read + Seek>(reader: &mut R) -> RFFile{
@@ -16,14 +17,14 @@ impl RFFile{
         let mut rf_decomp = Vec::new();
         let mut decomp_zlib = ZlibDecoder::new(reader);
         decomp_zlib.read_to_end(&mut rf_decomp).unwrap();
-        let mut rf_de_cursor = Cursor::new(rf_decomp);
+        let mut rf_de_cursor = Cursor::new(&rf_decomp);
         let mut data_vec = Vec::new();
         for n in 0..rf_hdr.nbr_entrys{
             let mut cur_rfdata = RFData::read(&mut rf_de_cursor).unwrap();
             
             data_vec.push(cur_rfdata);
         }
-        RFFile{header:rf_hdr,data:data_vec}
+        RFFile{header:rf_hdr,data:data_vec,debug_extract:rf_decomp}
     } 
 }
 

@@ -1,11 +1,10 @@
 
 use std::path::PathBuf;
 use std::io::BufReader;
-use std::io::Seek;
-use std::io::Read;
-use std::io::SeekFrom;
 use std::fs::File;
-use std::io::Cursor;
+use std::io::{Cursor, Read, Seek, SeekFrom, Write};
+use std::io::prelude::*;
+use flate2::read::ZlibDecoder;
 mod ls;
 mod rf;
 
@@ -34,12 +33,13 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     let mut rf_data = vec![0u8;rf_file_info.size as usize];
     //Alocate memory for rf
     dt.read_exact(&mut rf_data).unwrap();
+    let mut filetest = File::create("testOut.rf").unwrap();
+    filetest.write_all(&rf_data);
     //Read from buffer into that alocated memory
-    let mut rf_cursor = Cursor::new(rf_data);
+    let mut rf_cursor = Cursor::new(&rf_data);
     let rf = rf::RFFile::read(&mut rf_cursor);
+    filetest.seek(SeekFrom::Start(*& rf.header.hdr_len as u64)).unwrap();
+    filetest.write_all(&rf.debug_extract);
     println!("{0} is at pos {1}",rf.header.magic,rf_cursor.position());
     println!("{0}",rf.data[100].name_offset);
-
-
-
 }
