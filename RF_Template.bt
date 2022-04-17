@@ -1,0 +1,80 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Resorce File Sm4sh
+//   Authors: smb123w64gb
+//   Version: 0.1
+//   Purpose: Index for all files in LS/DT
+//  Category: File Archive Info
+// File Mask: Little Endian
+//  ID Bytes:  RF
+//   History: 
+//------------------------------------------------
+
+void padSkip(){
+FSkip(0x80-FTell()%0x80);
+}
+
+typedef struct {
+    ubyte folder_depth;
+    ubyte is_unk0 : 1;
+    ubyte is_folder : 1;
+    ubyte is_package : 1;
+    ubyte is_localized : 1;
+    ubyte is_off_in_pack : 1;
+    ubyte is_unk1 : 1;
+    ubyte is_overwrite : 1;
+    ubyte is_unk2 : 1;
+    ushort extra;
+    }RFFlags;
+local uint stringoffset = 0;
+struct RF {
+    struct RFHeader {
+	    char magic[2];
+        ushort ver;
+        uint hdr_len;
+        uint padding;
+        uint resource_entry;
+        
+        uint resource_size;
+        time_t timestamp;
+        uint compressed_size;
+        uint uncompressed_size;
+
+        uint offset_names;
+        stringoffset = offset_names;
+        uint name_size;
+        uint nbr_entrys;
+    } header <bgcolor=cLtGray>;
+    padSkip();
+    struct RFEntry {
+        uint offset_in_pack;
+        uint name_offset : 13;
+        uint Upper : 19;
+        local uint trueoffset = name_offset + stringoffset + 4;
+        uint cmp_size;
+        uint size;
+        time_t timestamp;
+        RFFlags flags;
+    } entry[header.nbr_entrys]<optimize=false>;
+    padSkip();
+    struct stringArea{
+        uint chunkCount;
+        struct namechunk{
+            //8k Chunks
+            char chunk[0x2000];
+        }chunk[chunkCount];
+        uint extCount;
+        struct ext{
+            uint offset;
+            local uint trueoffset = offset + stringoffset + 4;
+            local uint returnToMe = FTell();
+            FSeek(trueoffset);
+            string extString;
+            FSeek(returnToMe);
+        }Extention[extCount]<optimize=false,read=extString>;
+    }names;
+    //char Strings[header.name_size];
+    
+
+} resorce_file;

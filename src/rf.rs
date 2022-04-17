@@ -7,7 +7,7 @@ pub use binread::BinResult;
 pub struct RFFile{
     pub header: RFHeader,
     //Add bin read array func
-    pub data: Vec<RFData>,
+    pub data: Vec<RFEntry>,
     pub debug_extract: Vec<u8>,
 }
 impl RFFile{
@@ -20,7 +20,7 @@ impl RFFile{
         let mut rf_de_cursor = Cursor::new(&rf_decomp);
         let mut data_vec = Vec::new();
         for n in 0..rf_hdr.nbr_entrys{
-            let mut cur_rfdata = RFData::read(&mut rf_de_cursor).unwrap();
+            let mut cur_rfdata = RFEntry::read(&mut rf_de_cursor).unwrap();
             
             data_vec.push(cur_rfdata);
         }
@@ -49,7 +49,7 @@ pub struct RFHeader {
 }
 #[derive_binread]
 #[derive(Debug, PartialEq)]
-pub struct RFData {
+pub struct RFEntry {
     //Need to vector all our entrys, add in a input so we can know how many, and a string manager due to the crazy index to folder n stuff
     pub offset_in_pack: u32,
     pub name_offset: u32,
@@ -96,7 +96,7 @@ impl RFHeader{
         reader.read_le()
     }
 }
-impl RFData{
+impl RFEntry{
     pub fn read<R: Read + Seek>(reader: &mut R) -> BinResult<Self> {
         reader.read_le()
     }
