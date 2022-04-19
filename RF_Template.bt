@@ -64,7 +64,7 @@ struct RF {
             string lastHalf;
             FSeek(trueoffset-refoff);
             char firstHalf[4+reflen];
-            local extData = firstHalf+lastHalf;
+            local string extData = firstHalf+lastHalf;
         }
         FSeek(returnToMe);
         uint cmp_size;
