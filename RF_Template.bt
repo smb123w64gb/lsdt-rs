@@ -54,11 +54,24 @@ struct RF {
         uint midString : 7;
         uint extention : 8;
         local uint trueoffset = name_offset + stringoffset + 4;
+        local uint returnToMe = FTell();
+        FSeek(trueoffset);
+        if(midString==0){
+            string extData;
+        }else{
+            ubyte reflen;
+            ubyte refoff;
+            string lastHalf;
+            FSeek(trueoffset-refoff);
+            char firstHalf[4+reflen];
+            local extData = firstHalf+lastHalf;
+        }
+        FSeek(returnToMe);
         uint cmp_size;
         uint size;
         time_t timestamp;
         RFFlags flags;
-    } entry[header.nbr_entrys]<optimize=false,read=midString>;
+    } entry[header.nbr_entrys]<optimize=false,read=extData>;
     padSkip();
     struct stringArea{
         uint chunkCount;
