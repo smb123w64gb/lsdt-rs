@@ -26,6 +26,7 @@ typedef struct {
     ubyte is_overwrite : 1;
     ubyte is_unk2 : 1;
     ushort extra;
+    
     }RFFlags;
 local uint stringoffset = 0;
 struct RF {
@@ -49,14 +50,15 @@ struct RF {
     padSkip();
     struct RFEntry {
         uint offset_in_pack;
-        uint name_offset : 13;
-        uint Upper : 19;
+        uint name_offset : 17;
+        uint midString : 7;
+        uint extention : 8;
         local uint trueoffset = name_offset + stringoffset + 4;
         uint cmp_size;
         uint size;
         time_t timestamp;
         RFFlags flags;
-    } entry[header.nbr_entrys]<optimize=false>;
+    } entry[header.nbr_entrys]<optimize=false,read=midString>;
     padSkip();
     struct stringArea{
         uint chunkCount;
