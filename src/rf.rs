@@ -56,15 +56,18 @@ pub struct RFEntry {
     pub cmp_size: u32,
     pub size: u32,
     pub timestamp: u32,
+    pub folder_depth: u8,
     pub flags: RFFlags,
+    pub padding :u16,
 }
 
 #[bitfield]
 #[derive(BinRead,Debug,PartialEq)]
 #[br(map = Self::from_bytes)]
 pub struct StringInfo {
+    pub name_offset : B23,
+    pub ext_data : B1,
     pub ext_index : B8,
-    pub name_offset : B24,
 }
 
 #[bitfield]
@@ -79,7 +82,6 @@ pub struct ReltiveStringInfo {
 #[derive(BinRead,Debug,PartialEq)]
 #[br(map = Self::from_bytes)]
 pub struct RFFlags {
-    folder_depth: B8,
     is_unk0: bool,
     is_folder: bool,
     is_package: bool,
@@ -88,7 +90,6 @@ pub struct RFFlags {
     is_unk1:bool,
     is_overwrite:bool,
     is_unk2:bool,
-    extra:u16,
 }
 
 impl RFHeader{

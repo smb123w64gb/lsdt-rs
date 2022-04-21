@@ -50,8 +50,8 @@ struct RF {
     padSkip();
     struct RFEntry {
         uint offset_in_pack;
-        uint name_offset : 17;
-        uint midString : 7;
+        uint name_offset : 23;
+        uint midString : 1;
         uint extention : 8;
         local uint trueoffset = name_offset + stringoffset + 4;
         local uint returnToMe = FTell();
@@ -59,10 +59,14 @@ struct RF {
         if(midString==0){
             string extData;
         }else{
-            ubyte reflen;
-            ubyte refoff;
+            
+            ubyte reflen : 5;
+            ubyte upper : 3;
+            ubyte lower;
             string lastHalf;
-            FSeek(trueoffset-refoff);
+            local uint theseek = (upper>>1);
+            theseek = theseek << 8;
+            FSeek(trueoffset-(theseek+lower));
             char firstHalf[4+reflen];
             local string extData = firstHalf+lastHalf;
         }
