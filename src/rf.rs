@@ -8,7 +8,7 @@ pub struct RFFile{
     pub data: Vec<RFEntry>,
     pub debug_extract: Vec<u8>,
     pub strings: Vec<u8>,
-    pub extentions: Vec<String>
+    pub extentions: Vec<u32>
 }
 impl RFFile{
     pub fn read<R: Read + Seek>(reader: &mut R) -> RFFile{
@@ -25,14 +25,16 @@ impl RFFile{
             data_vec.push(cur_rfdata);
         }
         rf_de_cursor.seek(SeekFrom::Start((rf_hdr.offset_names - rf_hdr.hdr_len).into())).unwrap();
-        println!("{0}",rf_hdr.offset_names);
-        println!("{0}",rf_de_cursor.position());
+        
         let rfstrings = RFStr::read(&mut rf_de_cursor).unwrap().strbin.into();
         println!("{0}",rf_de_cursor.position());
-        let rfexts = RFExt::read(&mut rf_de_cursor).unwrap().exts.into_iter().map(NullString::into_string).collect();
+        let rfexts:Vec<u32> = RFExt::read(&mut rf_de_cursor).unwrap().exts.into();
+        println!("{0}",rf_de_cursor.position());
+        println!("{0}",rfexts[1]);
         //let rfexts = Vec::new();
         RFFile{header:rf_hdr,data:data_vec,debug_extract:rf_decomp,strings:rfstrings,extentions:rfexts}
     } 
+    
 }
 
 #[derive(BinRead)]
@@ -76,7 +78,7 @@ pub struct RFStr {
 pub struct RFExt {
     pub count: u32,
     #[br(args{count : count as usize})]
-    pub exts: Vec<NullString>,
+    pub exts: Vec<u32>,
 }
 
 #[bitfield]
