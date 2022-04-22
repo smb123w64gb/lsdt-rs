@@ -8,7 +8,7 @@ pub struct RFFile{
     pub data: Vec<RFEntry>,
     pub debug_extract: Vec<u8>,
     pub strings: Vec<u8>,
-    pub extentions: Vec<u32>
+    pub extentions: Vec<String>
 }
 impl RFFile{
     pub fn read<R: Read + Seek>(reader: &mut R) -> RFFile{
@@ -29,13 +29,29 @@ impl RFFile{
         let rfstrings = RFStr::read(&mut rf_de_cursor).unwrap().strbin.into();
         let rfexts:Vec<u32> = RFExt::read(&mut rf_de_cursor).unwrap().exts.into();
         let mut string_cursor = Cursor::new(&rfstrings);
+        let mut extention:Vec<String> = Vec::new();
         for n in rfexts.iter(){
             string_cursor.seek(SeekFrom::Start(*n as u64)).unwrap();
             let testString : NullString = string_cursor.read_le().unwrap();
-            println!("{0}",testString.into_string());
+            extention.push(testString.into_string());
+        }
+        for n in data_vec.iter(){
+            string_cursor.seek(SeekFrom::Start(n.name_info.name_offset() as u64)).unwrap();
+            if(n.name_info.ext_data() == 1){
+                let info : ReltiveStringInfo = string_cursor.read_le().unwrap();
+                let mid : NullString = string_cursor.read_le().unwrap();
+                //println!("{0}",(((info.refoffhi() as u32) << 7)  as u32));
+                string_cursor.seek(SeekFrom::Start((n.name_info.name_offset() - (((info.refoffhi() as u32) << 7) + info.refofflw() as u32))  as u64)).unwrap();
+                let lowstr : NullString = string_cursor.read_le().unwrap();
+                let mut low = lowstr.into_string().chars().collect::<Vec<char>>();
+                low.truncate((info.reflen() + 4)  as usize);
+                let lowstr : String = low.into_iter().collect();
+                println!("{0}{1}{2}",lowstr,mid.into_string(),extention[n.name_info.ext_index() as usize]);
+
+            }
         }
         //let rfexts = Vec::new();
-        RFFile{header:rf_hdr,data:data_vec,debug_extract:rf_decomp,strings:rfstrings,extentions:rfexts}
+        RFFile{header:rf_hdr,data:data_vec,debug_extract:rf_decomp,strings:rfstrings,extentions:extention}
     } 
 
 }
