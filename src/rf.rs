@@ -1,7 +1,7 @@
-use binrw::{binread,Error,BinResult, BinReaderExt,BinRead, NullString, io::{Read, Seek,SeekFrom}};
+use binrw::{binread,Error,BinResult, BinReaderExt,BinRead, NullString, io::{Read,Cursor, Seek,SeekFrom}};
 use modular_bitfield::prelude::*;
 use flate2::read::ZlibDecoder;
-use std::io::Cursor;
+
 pub struct RFFile{
     pub header: RFHeader,
     //Add bin read array func
@@ -27,14 +27,17 @@ impl RFFile{
         rf_de_cursor.seek(SeekFrom::Start((rf_hdr.offset_names - rf_hdr.hdr_len).into())).unwrap();
         
         let rfstrings = RFStr::read(&mut rf_de_cursor).unwrap().strbin.into();
-        println!("{0}",rf_de_cursor.position());
         let rfexts:Vec<u32> = RFExt::read(&mut rf_de_cursor).unwrap().exts.into();
-        println!("{0}",rf_de_cursor.position());
-        println!("{0}",rfexts[1]);
+        let mut string_cursor = Cursor::new(&rfstrings);
+        for n in rfexts.iter(){
+            string_cursor.seek(SeekFrom::Start(*n as u64)).unwrap();
+            let testString : NullString = string_cursor.read_le().unwrap();
+            println!("{0}",testString.into_string());
+        }
         //let rfexts = Vec::new();
         RFFile{header:rf_hdr,data:data_vec,debug_extract:rf_decomp,strings:rfstrings,extentions:rfexts}
     } 
-    
+
 }
 
 #[derive(BinRead)]
