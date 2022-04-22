@@ -41,5 +41,5 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     filetest.seek(SeekFrom::Start(*& rf.header.hdr_len as u64)).unwrap();
     filetest.write_all(&rf.debug_extract);
     println!("{0} is at pos {1}",rf.header.magic,rf_cursor.position());
-    println!("{0}",rf.data[100].name_offset);
+    println!("{0}",rf.data[(*&rf.header.nbr_entrys  as usize)-1].name_info.name_offset());
 }

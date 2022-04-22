@@ -1,27 +1,21 @@
-use binread::{BinReaderExt, derive_binread};
+use binrw::{BinReaderExt, BinRead, BinResult,io::*};
 use std::io::BufReader;
 use std::path::Path;
 
-pub use binread::Error;
-pub use binread::BinResult;
 pub mod ls_str;
-#[derive_binread]
-#[derive(Debug, PartialEq)]
+#[derive(BinRead)]
 pub struct LSFile {
     pub magic: u16,
     pub ver: u16,
     
-    #[br(temp)]
     file_count: u32,
 
-    #[br(count = file_count)]
-    #[br(args(ver))]
+    #[br(args{count: file_count as usize, inner:(ver,)})]
     pub ls_entry: Vec<LSEntry>,
 
    
 }
-#[derive_binread]
-#[derive(Debug, PartialEq,Copy,Clone)]
+#[derive(BinRead,Copy,Clone)]
 #[br(import(ver: u16))]
 pub struct LSEntry {
 
