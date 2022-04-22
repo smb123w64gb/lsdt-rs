@@ -32,8 +32,8 @@ impl RFFile{
         let mut extention:Vec<String> = Vec::new();
         for n in rfexts.iter(){
             string_cursor.seek(SeekFrom::Start(*n as u64)).unwrap();
-            let testString : NullString = string_cursor.read_le().unwrap();
-            extention.push(testString.into_string());
+            let teststring : NullString = string_cursor.read_le().unwrap();
+            extention.push(teststring.into_string());
         }
         for n in data_vec.iter(){
             string_cursor.seek(SeekFrom::Start(n.name_info.name_offset() as u64)).unwrap();
@@ -46,9 +46,16 @@ impl RFFile{
                 let mut low = lowstr.into_string().chars().collect::<Vec<char>>();
                 low.truncate((info.reflen() + 4)  as usize);
                 let lowstr : String = low.into_iter().collect();
-                println!("{0}{1}{2}",lowstr,mid.into_string(),extention[n.name_info.ext_index() as usize]);
+                let allnow : String = String::from(format!("{0}{1}{2}",lowstr,mid.into_string(),extention[n.name_info.ext_index() as usize]));
+                println!("{0}",&allnow);
 
             }
+            else{
+                let allnows : NullString = string_cursor.read_le().unwrap();
+                let allnow : String = String::from(format!("{0}{1}",allnows.into_string(),extention[n.name_info.ext_index() as usize]));
+                println!("{0}",&allnow);
+            }
+            
         }
         //let rfexts = Vec::new();
         RFFile{header:rf_hdr,data:data_vec,debug_extract:rf_decomp,strings:rfstrings,extentions:extention}
