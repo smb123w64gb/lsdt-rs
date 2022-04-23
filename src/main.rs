@@ -25,7 +25,7 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     //Resorce file info get!
 
     //let d = File::open(_dt_file).unwrap();
-    print!("RF Compressed is {0} Bytes\nRF Offset is {1}\n",rf_file_info.size,rf_file_info.offset);
+    //print!("RF Compressed is {0} Bytes\nRF Offset is {1}\n",rf_file_info.size,rf_file_info.offset);
     let  mut dt = BufReader::new(File::open(_dt_file).unwrap());
     //Load our Data file into memory
     dt.seek(SeekFrom::Start(rf_file_info.offset as u64)).unwrap();
@@ -38,8 +38,12 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     //Read from buffer into that alocated memory
     let mut rf_cursor = Cursor::new(&rf_data);
     let rf = rf::RFFile::read(&mut rf_cursor);
-    filetest.seek(SeekFrom::Start(*& rf.header.hdr_len as u64)).unwrap();
+    filetest.seek(SeekFrom::Start(0x80)).unwrap();
     filetest.write_all(&rf.debug_extract);
-    println!("{0} is at pos {1}",rf.header.magic,rf_cursor.position());
-    println!("{0} {1}",rf.data[(*&rf.header.nbr_entrys  as usize)-1].name_info.name_offset(),rf.extentions[8]);
+    println!("\"Compressed?\",\"Folder?\",\"Folder Depth\",\"File Offset\",\"File Size\",\"File Name\"");
+    for n in &rf.entrys {
+   
+        println!("{0},{1},{2},{3},{4},\"{5}\"",n.is_compressed,n.is_folder,n.folder_depth,n.file_offset,n.file_size,n.file_name);
+    
+    }
 }

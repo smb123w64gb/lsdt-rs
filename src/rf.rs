@@ -4,6 +4,7 @@ use flate2::read::ZlibDecoder;
 pub struct RFInfo{
     pub is_compressed : bool,
     pub is_folder : bool,
+    pub folder_depth: u32,
     pub file_offset : u32,
     pub file_size : u32,
     pub file_name : String,
@@ -30,9 +31,9 @@ impl RFFile{
         }
         rf_de_cursor.seek(SeekFrom::Start((rf_hdr.offset_names - rf_hdr.hdr_len).into())).unwrap();
         
-        let rfstrings = RFStr::read(&mut rf_de_cursor).unwrap().strbin.into();
-        let rfexts:Vec<u32> = RFExt::read(&mut rf_de_cursor).unwrap().exts.into();
+        let rfstrings : Vec<u8> = RFStr::read(&mut rf_de_cursor).unwrap().strbin.into();
         let mut string_cursor = Cursor::new(&rfstrings);
+        let rfexts:Vec<u32> = RFExt::read(&mut rf_de_cursor).unwrap().exts.into();
         let mut extention:Vec<String> = Vec::new();
         for n in rfexts.iter(){
             string_cursor.seek(SeekFrom::Start(*n as u64)).unwrap();
@@ -61,7 +62,14 @@ impl RFFile{
             
         }
         let mut allinfo : Vec<RFInfo> = Vec::new();
-
+        for n in 0..rf_hdr.nbr_entrys{
+            allinfo.push(RFInfo{is_compressed : *&data_vec[n as usize].flags.is_package(),
+                is_folder : *&data_vec[n as usize].flags.is_folder(),
+                folder_depth : *&data_vec[n as usize].folder_depth.into(),
+                file_offset : *&data_vec[n as usize].offset_in_pack,
+                file_size : *&data_vec[n as usize].size,
+                file_name : all_strings[n as usize].to_owned()})
+        }
         //let rfexts = Vec::new();
         RFFile{debug_extract:rf_decomp,entrys:allinfo}
     } 
