@@ -40,10 +40,22 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     let rf = rf::RFFile::read(&mut rf_cursor);
     filetest.seek(SeekFrom::Start(0x80)).unwrap();
     filetest.write_all(&rf.debug_extract);
-    println!("\"Compressed?\",\"Folder?\",\"Folder Depth\",\"File Offset\",\"File Size\",\"File Name\"");
+    let mut stringbuild: Vec<String> = Vec::new();
+    let mut string_outs: Vec<String> = Vec::new();
+    let mut folder_depth : u32 = 0;
     for n in &rf.entrys {
-   
-        println!("{0},{1},{2},{3},{4},\"{5}\"",n.is_compressed,n.is_folder,n.folder_depth,n.file_offset,n.file_size,n.file_name);
+        if(n.folder_depth > folder_depth && n.is_folder){
+            stringbuild.push(n.file_name.clone());
+            
+        }else if(n.folder_depth < folder_depth && n.is_folder){
+            stringbuild.pop();
+            stringbuild.push(n.file_name.clone());
+        }
+        folder_depth = n.folder_depth;
+        string_outs.push(format!("{0}{1}",stringbuild.join(""),n.file_name))
     
+    }
+    for n in string_outs{
+        println!("{0}",n);
     }
 }
