@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::{Cursor, Read, Seek, SeekFrom, Write};
 use std::io::prelude::*;
 use flate2::read::ZlibDecoder;
+use ls::LSEntry;
 mod ls;
 mod rf;
 
@@ -42,7 +43,6 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     filetest.write_all(&rf.debug_extract);
     let mut stringbuild: Vec<String> = Vec::new();
     let mut string_outs: Vec<String> = Vec::new();
-    let mut folder_depth : u32 = 0;
     for n in &rf.entrys {
         while n.folder_depth  < stringbuild.len() as u32 {
             stringbuild.pop();
@@ -51,7 +51,13 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
         string_outs.push(stringbuild.join(""))
     
     }
-    for n in string_outs{
-        println!("{0}",n);
-    }
+    let mut lsoffset: Vec<LSEntry> = Vec::new();
+    for n in 0..rf.entrys.len(){
+        if rf.entrys[n].is_compressed{
+        lsoffset.push(ls.find(&format!("data/{0}{1}",string_outs[n],if rf.entrys[n].is_compressed && rf.entrys[n].is_folder{
+            "packed"
+        }else{
+            ""
+        })));
+    }}
 }
