@@ -1,4 +1,4 @@
-use binrw::{binread,Error,BinResult, BinReaderExt,BinRead, NullString, io::{Read,Cursor, Seek,SeekFrom}};
+use binrw::{BinResult, BinReaderExt,BinRead, NullString, io::{Read,Cursor, Seek,SeekFrom}};
 use modular_bitfield::prelude::*;
 use flate2::read::ZlibDecoder;
 pub struct RFInfo{
@@ -24,16 +24,16 @@ impl RFFile{
         decomp_zlib.read_to_end(&mut rf_decomp).unwrap();
         let mut rf_de_cursor = Cursor::new(&rf_decomp);
         let mut data_vec = Vec::new();
-        for n in 0..rf_hdr.nbr_entrys{
-            let mut cur_rfdata = RFEntry::read(&mut rf_de_cursor).unwrap();
+        for _n in 0..rf_hdr.nbr_entrys{
+            let cur_rfdata = RFEntry::read(&mut rf_de_cursor).unwrap();
             
             data_vec.push(cur_rfdata);
         }
         rf_de_cursor.seek(SeekFrom::Start((rf_hdr.offset_names - rf_hdr.hdr_len).into())).unwrap();
         
-        let rfstrings : Vec<u8> = RFStr::read(&mut rf_de_cursor).unwrap().strbin.into();
+        let rfstrings : Vec<u8> = RFStr::read(&mut rf_de_cursor).unwrap().strbin;
         let mut string_cursor = Cursor::new(&rfstrings);
-        let rfexts:Vec<u32> = RFExt::read(&mut rf_de_cursor).unwrap().exts.into();
+        let rfexts:Vec<u32> = RFExt::read(&mut rf_de_cursor).unwrap().exts;
         let mut extention:Vec<String> = Vec::new();
         for n in rfexts.iter(){
             string_cursor.seek(SeekFrom::Start(*n as u64)).unwrap();
@@ -43,7 +43,7 @@ impl RFFile{
         let mut all_strings : Vec<String> = Vec::new();
         for n in data_vec.iter(){
             string_cursor.seek(SeekFrom::Start(n.name_info.name_offset() as u64)).unwrap();
-            if(n.name_info.ext_data() == 1){
+            if n.name_info.ext_data() == 1 {
                 let info : ReltiveStringInfo = string_cursor.read_le().unwrap();
                 let mid : NullString = string_cursor.read_le().unwrap();
                 //println!("{0}",(((info.refoffhi() as u32) << 7)  as u32));
@@ -52,22 +52,22 @@ impl RFFile{
                 let mut low = lowstr.into_string().chars().collect::<Vec<char>>();
                 low.truncate((info.reflen() + 4)  as usize);
                 let lowstr : String = low.into_iter().collect();
-                all_strings.push(String::from(format!("{0}{1}{2}",lowstr,mid.into_string(),extention[n.name_info.ext_index() as usize])));
+                all_strings.push(format!("{0}{1}{2}",lowstr,mid.into_string(),extention[n.name_info.ext_index() as usize]));
 
             }
             else{
                 let allnows : NullString = string_cursor.read_le().unwrap();
-                all_strings.push(String::from(format!("{0}{1}",allnows.into_string(),extention[n.name_info.ext_index() as usize])));
+                all_strings.push(format!("{0}{1}",allnows.into_string(),extention[n.name_info.ext_index() as usize]));
             }
             
         }
         let mut allinfo : Vec<RFInfo> = Vec::new();
         for n in 0..rf_hdr.nbr_entrys{
-            allinfo.push(RFInfo{is_compressed : *&data_vec[n as usize].flags.is_package(),
-                is_folder : *&data_vec[n as usize].flags.is_folder(),
-                folder_depth : *&data_vec[n as usize].folder_depth.into(),
-                file_offset : *&data_vec[n as usize].offset_in_pack,
-                file_size : *&data_vec[n as usize].size,
+            allinfo.push(RFInfo{is_compressed : data_vec[n as usize].flags.is_package(),
+                is_folder : data_vec[n as usize].flags.is_folder(),
+                folder_depth : data_vec[n as usize].folder_depth.into(),
+                file_offset : data_vec[n as usize].offset_in_pack,
+                file_size : data_vec[n as usize].size,
                 file_name : all_strings[n as usize].to_owned()})
         }
         //let rfexts = Vec::new();

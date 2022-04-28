@@ -1,4 +1,4 @@
-use binrw::{BinReaderExt, BinRead, BinResult,io::*};
+use binrw::{BinReaderExt, BinRead, BinResult};
 use std::io::BufReader;
 use std::path::Path;
 
