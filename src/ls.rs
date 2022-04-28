@@ -17,6 +17,7 @@ pub struct LSFile {
 }
 #[derive(BinRead,Copy,Clone)]
 #[br(import(ver: u16))]
+#[derive(Default)]
 pub struct LSEntry {
 
     pub crc: u32,
