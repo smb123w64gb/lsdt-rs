@@ -44,15 +44,11 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     let mut string_outs: Vec<String> = Vec::new();
     let mut folder_depth : u32 = 0;
     for n in &rf.entrys {
-        if(n.folder_depth > folder_depth && n.is_folder){
-            stringbuild.push(n.file_name.clone());
-            
-        }else if(n.folder_depth < folder_depth && n.is_folder){
+        while n.folder_depth  < stringbuild.len() as u32 {
             stringbuild.pop();
-            stringbuild.push(n.file_name.clone());
         }
-        folder_depth = n.folder_depth;
-        string_outs.push(format!("{0}{1}",stringbuild.join(""),n.file_name))
+        stringbuild.push(n.file_name.clone());
+        string_outs.push(stringbuild.join(""))
     
     }
     for n in string_outs{
