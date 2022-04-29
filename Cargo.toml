@@ -5,6 +5,13 @@ authors = ["smb123"]
 edition = "2021"
 description = "Library for working with Smash 4 DTLS Extration"
 
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+opt-level = "z"  # Optimize for size.
+lto = true
+codegen-units = 1
+panic = "abort"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]]
 name = "dtls"

@@ -90,6 +90,7 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
         }else{
             std::fs::write(&folder_path,cur_cmp_data).unwrap();
         }
+        println!("{0}",&folder_path.to_str().unwrap());
 
     }
 }
