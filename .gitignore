@@ -2,3 +2,4 @@ Cargo.lock
 /target
 testOut.rf
 test.csv
+/out

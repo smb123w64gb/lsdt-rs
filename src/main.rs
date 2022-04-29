@@ -16,9 +16,11 @@ mod rf;
 pub use ls::ls_str::crc32;
 
 #[derive(Parser)]
+#[clap(author, version, about, long_about = None)]
 struct Args {
     dt: PathBuf,
     ls: PathBuf,
+    #[clap(short, long, default_value = "Out")]
     out_dir: PathBuf,
 }
 
