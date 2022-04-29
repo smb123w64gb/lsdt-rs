@@ -6,7 +6,7 @@ use std::fs::File;
 
 use std::fs::*;
 use std::io::{Cursor, Read, Seek, SeekFrom, Write};
-
+use flate2::read::ZlibDecoder;
 
 use ls::LSEntry;
 use clap::Parser;
@@ -77,6 +77,19 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
             let _fs_cursor = Cursor::new(&cur_data);
             println!("{0}",&folder_path.to_str().unwrap());
             std::fs::write(&folder_path,cur_data).unwrap();
+
+    }else if !rf.entrys[n].is_folder{
+        let mut cur_cmp_data = vec![0u8;rf.entrys[n].file_size_cmp as usize];
+        let mut cur_data= vec![0u8;rf.entrys[n].file_size as usize];
+        dt.seek(SeekFrom::Start((lsoffset.offset + rf.entrys[n].file_offset) as u64)).unwrap();
+        dt.read_exact(&mut cur_cmp_data).unwrap();
+        if(rf.entrys[n].file_size_cmp != rf.entrys[n].file_size){
+        let mut decomp_zlib = ZlibDecoder::new(&cur_cmp_data[..]);
+        decomp_zlib.read_to_end(&mut cur_data).unwrap();
+        std::fs::write(&folder_path,cur_data).unwrap();
+        }else{
+            std::fs::write(&folder_path,cur_cmp_data).unwrap();
+        }
 
     }
 }

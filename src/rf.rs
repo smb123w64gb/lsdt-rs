@@ -7,6 +7,7 @@ pub struct RFInfo{
     pub folder_depth: u32,
     pub file_offset : u32,
     pub file_size : u32,
+    pub file_size_cmp : u32,
     pub file_name : String,
 
 }
@@ -68,7 +69,8 @@ impl RFFile{
                 folder_depth : data_vec[n as usize].folder_depth.into(),
                 file_offset : data_vec[n as usize].offset_in_pack,
                 file_size : data_vec[n as usize].size,
-                file_name : all_strings[n as usize].to_owned()})
+                file_name : all_strings[n as usize].to_owned(),
+                file_size_cmp: data_vec[n as usize].cmp_size})
         }
         //let rfexts = Vec::new();
         RFFile{debug_extract:rf_decomp,entrys:allinfo}
