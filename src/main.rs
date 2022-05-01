@@ -8,12 +8,28 @@ use std::fs::*;
 use std::io::{Cursor, Read, Seek, SeekFrom, Write};
 use flate2::read::ZlibDecoder;
 
+use std::error::Error;
+
+use rayon::prelude::*;
+
 use ls::LSEntry;
 use clap::Parser;
 mod ls;
 mod rf;
 
 pub use ls::ls_str::crc32;
+
+pub struct DecompressLater{
+    pub path:PathBuf,
+    pub data:Vec<u8>,
+    pub cmp:bool,
+}
+fn decode_reader(bytes:&[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
+    let mut z = ZlibDecoder::new(bytes);
+    let mut s:Vec<u8> = Vec::new();
+    z.read_to_end(&mut s)?;
+    Ok(s)
+}
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -63,6 +79,7 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
     
     }
     let mut lsoffset: LSEntry= LSEntry::default();
+    let mut dolater: Vec<DecompressLater> = Vec::new();
     for n in 0..rf.entrys.len(){
         let mut cur_data = path_out[n].clone();
         let mut folder_path = _out_folder.join(&path_out[n]);
@@ -77,24 +94,25 @@ fn extract(_ls_file: PathBuf, _dt_file: PathBuf,_out_folder: PathBuf) {
             dt.seek(SeekFrom::Start(lsoffset.offset as u64)).unwrap();
             dt.read_exact(&mut cur_data).unwrap();
             let _fs_cursor = Cursor::new(&cur_data);
-            println!("{0}",&folder_path.to_str().unwrap());
             std::fs::write(&folder_path,cur_data).unwrap();
 
     }else if !rf.entrys[n].is_folder{
         let mut cur_cmp_data = vec![0u8;rf.entrys[n].file_size_cmp as usize];
-        let mut cur_data= vec![0u8;rf.entrys[n].file_size as usize];
         dt.seek(SeekFrom::Start((lsoffset.offset + rf.entrys[n].file_offset) as u64)).unwrap();
         dt.read_exact(&mut cur_cmp_data).unwrap();
-        if(rf.entrys[n].file_size_cmp != rf.entrys[n].file_size){
-        let mut decomp_zlib = ZlibDecoder::new(&cur_cmp_data[..]);
-        decomp_zlib.read_to_end(&mut cur_data).unwrap();
-        std::fs::write(&folder_path,cur_data).unwrap();
-        }else{
-            std::fs::write(&folder_path,cur_cmp_data).unwrap();
-        }
-        println!("{0}",&folder_path.to_str().unwrap());
+        dolater.push(DecompressLater{
+            path:folder_path,
+            data:cur_cmp_data,
+            cmp:rf.entrys[n].file_size_cmp != rf.entrys[n].file_size
 
+        });
     }
 }
+dolater.par_iter().for_each(|c|
+    std::fs::write(&c.path,if c.cmp{
+        decode_reader(&c.data[..]).unwrap() 
+    }else{
+        c.data.clone()
+    } ).unwrap());
 
 }
