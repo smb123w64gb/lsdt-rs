@@ -2,6 +2,7 @@ use binrw::{BinReaderExt, BinRead, BinResult};
 use std::io::BufReader;
 use std::path::Path;
 
+
 pub mod ls_str;
 #[derive(BinRead)]
 pub struct LSFile {
