@@ -25,9 +25,9 @@ pub struct LSEntry {
     pub offset: u32,
     pub size: u32,
     #[br(if(ver == 2 ))]
-    pub dt_index: Option<u32>,
+    pub dt_index: Option<u16>,
     #[br(if(ver == 2 ))]
-    pub padding: Option<u32>,
+    pub padding: Option<u16>,
     
 }
 
