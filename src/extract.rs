@@ -35,6 +35,7 @@ pub fn extract(_ls_file: PathBuf, _dt_file: PathBuf, _dt1_file: PathBuf,_out_fol
     let mut dts = Vec::new();
     dts.push(BufReader::new(File::open(_dt_file).unwrap()));
     if !_dt1_file.as_os_str().is_empty() {
+        println!("{0}",_dt1_file.as_os_str().to_str().unwrap());
         dts.push(BufReader::new(File::open(_dt1_file).unwrap()));
     }
     let mut dtIdx;
