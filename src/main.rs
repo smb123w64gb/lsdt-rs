@@ -19,6 +19,6 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    println!("ls path: {:?}", args.ls);
+    //println!("ls path: {:?}", args.ls);
     extract::extract(args.ls,args.dt, args.out_dir);
 }

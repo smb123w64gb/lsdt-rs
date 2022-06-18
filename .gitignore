@@ -3,3 +3,5 @@ Cargo.lock
 testOut.rf
 test.csv
 /out
+out.CSV
+out.txt
