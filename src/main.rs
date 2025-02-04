@@ -1,6 +1,5 @@
-
-use std::path::PathBuf;
 use clap::Parser;
+use std::path::PathBuf;
 
 mod ls;
 mod rf;
@@ -21,5 +20,5 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    extract::extract(args.ls,args.dt,args.dt1, args.out_dir);
+    extract::extract(args.ls, args.dt, args.dt1, args.out_dir);
 }
