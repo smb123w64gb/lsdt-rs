@@ -6,23 +6,18 @@ edition = "2021"
 description = "Library for working with Smash 4 DTLS Extration"
 
 [profile.release]
-strip = true  # Automatically strip symbols from the binary.
-opt-level = "z"  # Optimize for size.
+strip = true
 lto = true
 codegen-units = 1
-panic = "abort"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]]
 name = "dtls"
 path = "src/main.rs"
 
-
 [dependencies]
-binrw = "0.8.4"
-flate2 = "1.0.20"
+binrw = "0.14.1"
+zune-inflate = "0.2.54"
 crc32fast = "1.2"
 modular-bitfield = "0.11.2"
-clap = { version = "3.1.12", features = ["derive"] }
+clap = { version = "4.5.28", features = ["derive"] }
 rayon = "1.5.2"
-

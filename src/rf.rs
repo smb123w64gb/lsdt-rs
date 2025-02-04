@@ -2,8 +2,8 @@ use binrw::{
     io::{Cursor, Read, Seek, SeekFrom},
     BinRead, BinReaderExt, BinResult, NullString,
 };
-use flate2::read::ZlibDecoder;
 use modular_bitfield::prelude::*;
+
 pub struct RFInfo {
     pub is_compressed: bool,
     pub is_folder: bool,
@@ -13,6 +13,7 @@ pub struct RFInfo {
     pub file_size_cmp: u32,
     pub file_name: String,
 }
+
 pub struct RFFile {
     pub debug_extract: Vec<u8>,
     pub entrys: Vec<RFInfo>,
@@ -22,9 +23,11 @@ impl RFFile {
     pub fn read<R: Read + Seek>(reader: &mut R) -> RFFile {
         let rf_hdr = RFHeader::read(reader).unwrap();
         reader.seek(SeekFrom::Start(rf_hdr.hdr_len.into())).unwrap();
-        let mut rf_decomp = Vec::new();
-        let mut decomp_zlib = ZlibDecoder::new(reader);
-        decomp_zlib.read_to_end(&mut rf_decomp).unwrap();
+        let mut rf_comp = Vec::new();
+        reader.read_to_end(&mut rf_comp).unwrap();
+        let rf_decomp = zune_inflate::DeflateDecoder::new(&rf_comp)
+            .decode_zlib()
+            .unwrap();
         let mut rf_de_cursor = Cursor::new(&rf_decomp);
         let mut data_vec = Vec::new();
         for _n in 0..rf_hdr.nbr_entrys {
@@ -45,7 +48,7 @@ impl RFFile {
         for n in rfexts.iter() {
             string_cursor.seek(SeekFrom::Start(*n as u64)).unwrap();
             let teststring: NullString = string_cursor.read_le().unwrap();
-            extention.push(teststring.into_string());
+            extention.push(teststring.to_string());
         }
         let mut all_strings: Vec<String> = Vec::new();
         for n in data_vec.iter() {
@@ -64,20 +67,20 @@ impl RFFile {
                     ))
                     .unwrap();
                 let lowstr: NullString = string_cursor.read_le().unwrap();
-                let mut low = lowstr.into_string().chars().collect::<Vec<char>>();
+                let mut low = lowstr.to_string().chars().collect::<Vec<char>>();
                 low.truncate((info.reflen() + 4) as usize);
                 let lowstr: String = low.into_iter().collect();
                 all_strings.push(format!(
-                    "{0}{1}{2}",
+                    "{}{}{}",
                     lowstr,
-                    mid.into_string(),
+                    mid,
                     extention[n.name_info.ext_index() as usize]
                 ));
             } else {
                 let allnows: NullString = string_cursor.read_le().unwrap();
                 all_strings.push(format!(
-                    "{0}{1}",
-                    allnows.into_string(),
+                    "{}{}",
+                    allnows,
                     extention[n.name_info.ext_index() as usize]
                 ));
             }
@@ -94,7 +97,6 @@ impl RFFile {
                 file_size_cmp: data_vec[n as usize].cmp_size,
             })
         }
-        //let rfexts = Vec::new();
         RFFile {
             debug_extract: rf_decomp,
             entrys: allinfo,
