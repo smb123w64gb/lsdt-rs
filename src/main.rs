@@ -11,8 +11,7 @@ mod extract;
 struct Args {
     ls: PathBuf,
     dt: PathBuf,
-    #[clap(short, long, default_value = "")]
-    dt1: PathBuf,
+    dt1: Option<PathBuf>,
     #[clap(short, long, default_value = "Out")]
     out_dir: PathBuf,
 }
